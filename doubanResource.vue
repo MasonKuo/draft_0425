@@ -2,7 +2,7 @@
   <div id="doubanResource">
     <!-- <Card> -->
     <div v-on:click="isShow =! isShow">
-      <h2>DoubanMovie Top {{topx}}
+      <h2>DoubanMovie Top {{topx?topx:topxx}}
         <!-- <input style="width:50px"/>
         <button>search</button> -->
       </h2>
@@ -39,11 +39,12 @@
 export default {
   name: 'doubanResource',
   data: () => ({
-    topx: 10,
+    topxx: 5,
     movies: [],
     selectedMovie: {},
     isShow: false,
   }),
+  props: ['topx'],
   // components: {
   //   Card
   // },
@@ -54,7 +55,7 @@ export default {
     //   this.movies = movietop10;
     // }
     // else {
-      this.$http.jsonp('https://api.douban.com/v2/movie/top250?count=' + this.topx, {}, {
+      this.$http.jsonp('https://api.douban.com/v2/movie/top250?count=' + (this.topx?this.topx:this.topxx), {}, {
         headers: {
 
         },
