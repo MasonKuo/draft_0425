@@ -124,6 +124,9 @@ export default {
   #doubanResource h2{
     color: #ccc;
   }
+  #doubanResource h2:hover{
+    color: #eee;
+  }
   .movieMessage {
     color: black;
     background-color: #666;
@@ -138,6 +141,7 @@ export default {
   }
   .movieMessage li{
     list-style: none;
+    padding: 2px;
     margin-left: 20px;
     display: inline-block;
   }
