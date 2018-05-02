@@ -1,29 +1,34 @@
 <template>
   <div id="doubanResource">
     <!-- <Card> -->
-    <div>
-      <h1>DoubanMovie Top 10</h1>
+    <div v-on:click="isShow =! isShow">
+      <h2>DoubanMovie Top {{topx}}
+        <!-- <input style="width:50px"/>
+        <button>search</button> -->
+      </h2>
     </div>
-      <ul v-for="article in articles">
-        <li class="collapse-wrap" v-bind:key="article.key" v-on:click="_showMovieDetail">
-          {{article.title}}
+    <div class="movieList" v-show="isShow">
+      <ul v-for="movie in movies">
+        <li class="collapse-wrap" v-bind:key="movie.key" v-on:click="_showMovieDetail">
+          {{movie.title}}
         </li>
         <transition name="bounce">
-          <div v-show="article.title === selectedArticle.title" class="movieMessage">
-            <h3>上映</h3>
-            <li>{{selectedArticle.year}}</li>
-            <h3>导演</h3>
-            <div v-for="director in selectedArticle.directors">
+          <div v-show="movie.title === selectedMovie.title" class="movieMessage">
+            <h4>上映</h4>
+            <li>{{selectedMovie.year}}</li>
+            <h4>导演</h4>
+            <div v-for="director in selectedMovie.directors">
               <li>{{director.name}}</li>
               <!-- <img v-bind:src="director.avatars.small" v-bind:alt="director.alt"> -->
             </div>
-            <h3>主演</h3>
-            <div v-for="cast in selectedArticle.casts">
+            <h4>主演</h4>
+            <div v-for="cast in selectedMovie.casts">
               <li>{{cast.name}}</li>
             </div>
           </div>
         </transition>
       </ul>
+    </div>
     <!-- </Card> -->
   </div>
 </template>
@@ -34,56 +39,61 @@
 export default {
   name: 'doubanResource',
   data: () => ({
-    articles: [],
-    selectedArticle: {},
+    topx: 10,
+    movies: [],
+    selectedMovie: {},
+    isShow: false,
   }),
   // components: {
   //   Card
   // },
   mounted() {
-    let movietop10 = JSON.parse(window.localStorage.getItem('movietop10'));
-    if (movietop10) {
-      // console.log(movietop10);
-      this.articles = movietop10;
-    }
-    else {
-      this.$http.jsonp('https://api.douban.com/v2/movie/top250?count=100', {}, {
+    // let movietop10 = JSON.parse(window.localStorage.getItem('movietopx'));
+    // if (movietop10) {
+    //   // console.log(movietop10);
+    //   this.movies = movietop10;
+    // }
+    // else {
+      this.$http.jsonp('https://api.douban.com/v2/movie/top250?count=' + this.topx, {}, {
         headers: {
 
         },
         emulateJSON: true,
         cache: true,
       }).then((response) => {
-        this.articles = response.data.subjects;
-        window.localStorage.setItem('movietop10', JSON.stringify(response.data.subjects));
+        this.movies = response.data.subjects;
+        // window.localStorage.setItem('movietopx', JSON.stringify(response.data.subjects));
         // console.log(response.data.subjects);
       }, (response) => {
         console.log(response);
       });
-    }
+    // }
   },
   methods: {
     _showMovieDetail: function (e) {
-      console.log(this.articles);
-      let _selectedArticle = {};
-      this.articles.forEach(function (item, index) {
+      console.log(this.movies);
+      let _selectedMovie = {};
+      this.movies.forEach(function (item, index) {
         // console.log(item);
         if (item.title === e.target.innerText) {
-          _selectedArticle = item;
+          _selectedMovie = item;
         }
       });
-      if (this.selectedArticle && this.selectedArticle === _selectedArticle) {
-        this.selectedArticle = {};
+      if (this.selectedMovie && this.selectedMovie === _selectedMovie) {
+        this.selectedMovie = {};
         return;
       }
-      this.selectedArticle = _selectedArticle;
-      // console.log(this.selectedArticle);
+      this.selectedMovie = _selectedMovie;
+      // console.log(this.selectedMovie);
     },
   }
 };
 </script>
 
 <style>
+  *{
+    cursor: default;
+  }
   #doubanResource{
     /* margin: 0 40px; */
     width: 400px;
@@ -93,6 +103,7 @@ export default {
     margin: 0 auto;
     font-size: 1em;
     margin-top: 10px;
+    user-select: none;
   }
   #doubanResource ul{
     padding: 0;
@@ -104,24 +115,35 @@ export default {
     margin-top: 10px;
     cursor: default;
     padding: 5px;
+    border-radius: 2px;
   }
   #doubanResource ul>li:hover{
     background-color: #eee;
+    box-shadow: 2px 2px 12px white;
   }
-  #doubanResource h1{
+  #doubanResource h2{
     color: #ccc;
   }
   .movieMessage {
     color: black;
     background-color: #666;
     text-align: left;
+    box-shadow: -1px -1px 16px black inset;
+    padding: 15px;
   }
-  .movieMessage h3{
+  .movieMessage h4{
     padding: 5px 10px;
+    margin-top: 10px;
+    margin-bottom: 0px;
   }
   .movieMessage li{
     list-style: none;
     margin-left: 20px;
+    display: inline-block;
+  }
+  .movieMessage li:hover{
+    color: #ccc;
+    background-color: #333;
   }
   .movieMessage * {
     /* display: inline-block; */
