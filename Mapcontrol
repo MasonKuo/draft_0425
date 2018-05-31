@@ -1,0 +1,177 @@
+// Mapcontrol
+
+import Map from 'ol/map';
+import View from 'ol/view';
+import TileLayer from 'ol/layer/tile';
+import XYZ from 'ol/source/xyz';
+
+let InitMap = ({...props}) => {
+  let randomNum = new Date().getSeconds() % 3 + 1;
+  let googleUrl = 'http://mt{0}.google.cn/vt/lyrs=m&hl=en-US&gl=cn&x={x}&y={y}&z={z}';
+  googleUrl = googleUrl.replace('{0}', randomNum);
+  let map = new Map({
+    target: 'map1',
+    layers: [
+      new TileLayer({
+        source: new XYZ({
+          // url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          url: googleUrl,
+          wrapX: false
+        }),
+        // opacity: 0.4
+      })
+    ],
+    view: new View({
+      center: [114.065257, 22.559325],
+      projection: 'EPSG:4326',
+      zoom: 10,
+      minZoom: 6,
+      maxZoom: 22,
+    })
+  });
+  window.map = map;
+
+  // changePosition: (position) => {
+  //   map.getView().setCenter([position.lon, position.lat]);
+  // }
+
+
+  document.getElementById('zoom-out').onclick = () => {
+    var view = map.getView();
+    var zoom = view.getZoom();
+    view.setZoom(zoom - 1);
+  };
+
+  document.getElementById('zoom-in').onclick = () => {
+    var view = map.getView();
+    var zoom = view.getZoom();
+    view.setZoom(zoom + 1);
+  };
+
+  // document.getElementById('setPosition').onclick = () => {
+  //   const valuelon = this.refs.lon.value;
+  //   const valuelat = this.refs.lat.value;
+  //
+  //   map.getView().setCenter([valuelon, valuelat]);
+  // };
+}
+
+export default InitMap;
+
+// Navigation
+
+import React, { Component } from 'react';
+import { Layout, Modal, Button, Input } from 'antd';
+import InitMap from '.././Mapcontrol';
+const { Header, Footer, Sider, Content } = Layout;
+const reg = /^-?(0|[1-9][0-9]*)(\.[0-9]*)?$/;
+
+class Navigation extends Component {
+  state = {
+    ModalText: 'content of this modal',
+    confirmLoading: false,
+    visible: false,
+    lon: 0,
+    lat: 0,
+  }
+  showModal = () => {
+    this.setState({
+      visible: true,
+    })
+  }
+  handleOK = () => {
+    this.setState({
+      ModalText: 'this modal will be closed after',
+      confirmLoading: true,
+    })
+    setTimeout(() => {
+      this.setState({
+        visible: false,
+        confirmLoading: false,
+      })
+    }, 2000)
+  }
+  handleCancel = () => {
+    console.log('Clicked cancel button');
+    this.setState({
+      visible: false
+    })
+  }
+  componentDidMount = () => {
+    InitMap();
+  }
+  // limite number input
+  // onChange = (e) => {
+  //   const { value } = e.target;
+  //   const reg = /^-?(0|[1-9][0-9]*)(\.[0-9]*)?$/;
+  //   if ((!isNaN(value) && reg.test(value)) || value === '' || value === '-') {
+  //     this.props.onChange(value);
+  //   }
+  // }
+  changeLon = (e) => {
+    const { value } = e.target;
+    if ((!isNaN(value) && reg.test(value))
+    || value === ''
+    || value === '-') {
+      this.setState({
+        lon: value
+      })
+    }
+  }
+  changeLat = (e) => {
+    const { value } = e.target;
+    if ((!isNaN(value) && reg.test(value))
+    || value === ''
+    || value === '-') {
+      this.setState({
+        lat: value
+      })
+    }
+  }
+  enterPosition = (e) => {
+    if (e.charCode === 13) {
+      this.changeLonLat();
+    }
+  }
+  changeLonLat = () => {
+    let lon = this.state.lon;
+    let lat = this.state.lat;
+    let position = [lon, lat];
+    window.map.getView().setCenter(position);
+  }
+  render() {
+    const { ModalText, confirmLoading, visible } = this.state;
+    const pathname = window.location.pathname;
+    return (
+        <Content>
+          {/* {
+            (pathname.substring(pathname.lastIndexOf('/')) == '/Navigation') ?
+            <React.Fragment>
+            <Button type="primary" onClick={this.showModal}>Open3</Button>
+            </React.Fragment>
+            : <Button type="primary" onClick={this.showModal}>Open4</Button>
+          }
+          <Modal title="Title"
+            visible={visible}
+            onOk={this.handleOK}
+            confirmLoading={confirmLoading}
+            onCancel={this.handleCancel}
+            >
+              <p>{ModalText}</p>
+          </Modal> */}
+          <div id="map1" ref="map" style={{height: '700px', width: '100%'}}></div>
+          <Input value={this.state.lon} onChange={this.changeLon} onKeyPress={this.enterPosition} placeholder="lon" maxLength="20" style={{ width: '200px', position: 'absolute',left: '10px',top: '5%' }}/>
+          <Input value={this.state.lat} onChange={this.changeLat} onKeyPress={this.enterPosition} placeholder="lat" maxLength="20" style={{ width: '200px', position: 'absolute',left: '10px',top: '10%' }}/>
+          <Button type="primary" onClick={this.changeLonLat} style={{ width: 'auto', position: 'absolute',left: '10px',top: '15%' }}>locate</Button>
+          <Button type="primary" id="zoom-in" style={{ width: '45px', position: 'absolute',left: '10px',top: '25%' }}>+</Button>
+          <Button type="primary" id="zoom-out" style={{ width: '45px', position: 'absolute',left: '10px',top: '30%' }}>-</Button>
+          {/* <custom.Popup ref={comp => this.popupComp = comp}>
+
+          </custom.Popup> */}
+        </Content>
+    );
+  }
+}
+
+export default Navigation;
+
