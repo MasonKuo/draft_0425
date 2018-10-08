@@ -24,7 +24,7 @@ class BubbleGraph {
       }
     })
     let root = nodes[0]
-    root.radius = Math.random() * 20 + 100
+    root.radius = Math.random() * 20 + 150
     root.fixed = true
 
     let color = d3.scaleOrdinal()
@@ -37,11 +37,11 @@ class BubbleGraph {
         return i
       }))
       .force('collide', d3.forceCollide(function (d) {
-        return d.radius + that.size / 2
+        return d.radius + that.size / 2 + 2
       }).iterations(24).strength(0.5))
-      .force('x', d3.forceX(0))
-      .force('y', d3.forceY(0))
-      .force('charge', d3.forceManyBody().strength(-10))
+      .force('x', d3.forceX(w / 2).strength(0.25))
+      .force('y', d3.forceY(h / 2).strength(0.25))
+      .force('charge', d3.forceManyBody().strength(-20))
       .force('center', d3.forceCenter(w / 2, h / 2))
 
     let svg = this.tag.append('svg:svg').style('border', '1px dashed #CCC').style('user-select', 'none')
